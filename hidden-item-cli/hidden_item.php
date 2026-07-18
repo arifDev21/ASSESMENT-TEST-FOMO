@@ -1,13 +1,5 @@
 <?php
 
-/**
- * Task 2: Hidden Item Game CLI Program
- * 
- * To run:
- * php hidden_item.php
- */
-
-// Define terminal color helpers
 function color($text, $colorCode) {
     return "\033[{$colorCode}m{$text}\033[0m";
 }
@@ -17,18 +9,17 @@ function bold($text) {
 }
 
 function success($text) {
-    return color($text, '32'); // Green
+    return color($text, '32');
 }
 
 function warning($text) {
-    return color($text, '33'); // Yellow
+    return color($text, '33');
 }
 
 function info($text) {
-    return color($text, '36'); // Cyan
+    return color($text, '36');
 }
 
-// 1. Define the grid layout exactly as requested
 $grid = [
     '########',
     '#......#',
@@ -41,7 +32,6 @@ $grid = [
 $rows = count($grid);
 $cols = strlen($grid[0]);
 
-// Find starting position 'X'
 $startX = -1;
 $startY = -1;
 
@@ -63,15 +53,14 @@ if ($startX === -1 || $startY === -1) {
 echo bold("\n=== HIDDEN ITEM GAME SOLVER ===\n\n");
 echo "Starting position: " . info("X") . " at " . bold("Grid(Row: {$startY}, Col: {$startX})") . " | " . bold("Cartesian(X: " . ($startX + 1) . ", Y: " . ($rows - $startY) . ")\n\n");
 
-// Output grid representation
 echo bold("Initial Grid Layout:\n");
 foreach ($grid as $row) {
     for ($c = 0; $c < strlen($row); $c++) {
         $char = $row[$c];
         if ($char === '#') {
-            echo color($char, '90'); // Dark gray for obstacles
+            echo color($char, '90');
         } elseif ($char === 'X') {
-            echo color($char, '31;1'); // Bold red for starting point
+            echo color($char, '31;1');
         } else {
             echo $char;
         }
@@ -82,14 +71,7 @@ echo "\n";
 
 $solutions = [];
 
-// 2. Scan all possible steps A, B, C
-// Since grid is small:
-// Max A (North steps) is $startY (since row 0 is top)
-// Max B (East steps) is $cols - $startX (since col $cols-1 is right)
-// Max C (South steps) is $rows - 1
-
 for ($a = 1; $a < $rows; $a++) {
-    // Check North traversal
     $validA = true;
     for ($i = 1; $i <= $a; $i++) {
         $currRow = $startY - $i;
@@ -105,7 +87,6 @@ for ($a = 1; $a < $rows; $a++) {
     $p1Col = $startX;
 
     for ($b = 1; $b < $cols; $b++) {
-        // Check East traversal
         $validB = true;
         for ($j = 1; $j <= $b; $j++) {
             $currCol = $p1Col + $j;
@@ -121,7 +102,6 @@ for ($a = 1; $a < $rows; $a++) {
         $p2Col = $p1Col + $b;
 
         for ($c = 1; $c < $rows; $c++) {
-            // Check South traversal
             $validC = true;
             for ($k = 1; $k <= $c; $k++) {
                 $currRow = $p2Row + $k;
@@ -136,7 +116,6 @@ for ($a = 1; $a < $rows; $a++) {
             $p3Row = $p2Row + $c;
             $p3Col = $p2Col;
 
-            // Found a valid solution!
             $solutions[] = [
                 'steps' => ['A' => $a, 'B' => $b, 'C' => $c],
                 'grid' => ['row' => $p3Row, 'col' => $p3Col],
@@ -146,12 +125,10 @@ for ($a = 1; $a < $rows; $a++) {
     }
 }
 
-// 3. Output results
 echo bold("Reachable Probable Coordinates:\n");
 if (empty($solutions)) {
     echo warning("No valid coordinate paths found.\n");
 } else {
-    // Deduplicate solutions by coordinate points
     $uniqueCoords = [];
     foreach ($solutions as $sol) {
         $key = $sol['grid']['row'] . ',' . $sol['grid']['col'];
@@ -165,7 +142,6 @@ if (empty($solutions)) {
         $uniqueCoords[$key]['paths'][] = $sol['steps'];
     }
 
-    // Print list
     $index = 1;
     foreach ($uniqueCoords as $coord) {
         $gridStr = "Grid(Row: {$coord['grid']['row']}, Col: {$coord['grid']['col']})";
@@ -180,19 +156,18 @@ if (empty($solutions)) {
     }
     echo "\n";
 
-    // 4. Bonus Points: Display the grid with the probable item locations marked with a $ symbol
     echo bold("Grid with Probable Locations Marked ($):\n");
     for ($r = 0; $r < $rows; $r++) {
         for ($c = 0; $c < $cols; $c++) {
             $key = $r . ',' . $c;
             if (isset($uniqueCoords[$key])) {
-                echo success('$'); // Highlight probable location in green $
+                echo success('$');
             } else {
                 $char = $grid[$r][$c];
                 if ($char === '#') {
-                    echo color($char, '90'); // Dark gray for obstacles
+                    echo color($char, '90');
                 } elseif ($char === 'X') {
-                    echo color($char, '31;1'); // Red for start
+                    echo color($char, '31;1');
                 } else {
                     echo $char;
                 }
